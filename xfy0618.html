@@ -4,108 +4,175 @@
 <meta charset="UTF-8" />
 <title>Vertical Letter & Photo Viewer</title>
 <style>
-    /*—— 基本 ——*/
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{
-        background:url("background.png") center/cover no-repeat fixed;
-        height:100vh;        /* 讓 #stage 跟著整個螢幕 */
-        font-family:system-ui,"Helvetica Neue",sans-serif;
-    }
-    #stage{
-        position:relative;
-        width:100%;
-        height:100%;
-    }
+/* ===== 基本 ===== */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+    background:url("background.png") center/cover no-repeat fixed;
+    height:100vh;font-family:system-ui,"Helvetica Neue",sans-serif;
+}
+#stage{position:relative;width:100%;height:100%;}
 
-    /*—— LETTER ——*/
-    #letterWrapper{
-        position:absolute;
-        top:4vh;                     /* 與頂端保留一點距離 */
-        left:50%;
-        transform:translateX(-50%);  /* 水平置中 */
-        width:clamp(260px, 80vw, 680px);     /* 隨螢幕伸縮，保留上下限 */
-        aspect-ratio:3/2;            /* 3:2 比例，讓高度自動 */
-    }
-    #letterImg{
-        width:100%;
-        height:100%;
-        object-fit:cover;
-        transform:rotate(3deg);
-        box-shadow:0 0 0 1px #0003;
-    }
+/* ===== LETTER 疊圖容器 ===== */
+#letterWrapper{
+    position:absolute;top:4vh;left:55%;
+    transform:translateX(-50%) rotate(3deg);
+    width:clamp(260px,80vw,680px);aspect-ratio:3/2;
+    perspective:1200px;           /* 立體視差 */
+}
+.letterImg{     /* 前後兩張共用 */
+    position:absolute;top:0;left:0;
+    width:100%;height:100%;object-fit:cover;
+    box-shadow:0 0 0 1px #0003;
+    pointer-events:none;
+}
 
-    /*—— PHOTO ——*/
-    #photo{
-        position:absolute;
-        top:55vh;                    /* 置於畫面下方 */
-        left:50%;
-        transform:translateX(-50%) rotate(-6deg);
-        width:clamp(220px, 70vw, 540px);
-        aspect-ratio:4/3;
-        box-shadow:0 0 0 1px #0003;
-    }
-    #photoImg{width:100%;height:100%;object-fit:cover;}
+/* ===== PHOTO ===== */
+#photo{
+    position:absolute;top:45vh;left:45%;
+    transform:translateX(-50%) rotate(-6deg);
+    width:clamp(220px,70vw,540px);aspect-ratio:4/3;
+    box-shadow:0 0 0 1px #0003;
+}
+#photoImg{width:100%;height:100%;object-fit:cover;transition:opacity .4s;}
 
-    /*—— 導覽按鈕 ——*/
-    .navBtn{
-        position:absolute;
-        top:50%; translate:0 -50%;
-        width:clamp(30px, 7vw, 64px);
-        height:clamp(45px, 10vh, 90px);
-        border:none; background:transparent;
-        cursor:pointer; padding:0;
-    }
-    #prevBtn{left:-9vw;}   /* 故意放在信紙外，產生「凸出」效果 */
-    #nextBtn{right:-9vw;}
+/* ===== 導覽按鈕 ===== */
+.navBtn{
+    position:absolute;top:50%;translate:0 -50%;
+    width:clamp(30px,7vw,64px);height:clamp(45px,10vh,90px);
+    border:none;background:transparent;cursor:pointer;padding:0;
+}
+#prevBtn{left:-3vw;z-index:9999;}   /* ← 永遠最上層 */
+#nextBtn{right:-3vw;z-index:9999;}
+.navBtn img{width:100%;height:100%;object-fit:contain;}
+.hidden{visibility:hidden;}
 
-    .navBtn img{width:100%;height:100%;object-fit:contain;}
-    .hidden{visibility:hidden;}
+/* ===== 翻頁動畫 ===== */
+@keyframes flip-forward-out{
+    0%   {transform:rotate(3deg) translateZ(0) scale(1);opacity:1;}
+    60%  {transform:rotate(8deg) translate(-6%,10%) scale(.9);opacity:.7;}
+    100% {transform:rotate(8deg) translate(-6%,60%) scale(.9);opacity:0;}
+}
+@keyframes flip-back-in{
+    0%   {transform:rotate(8deg) translate(-6%,60%) scale(.9);opacity:0;}
+    40%  {transform:rotate(8deg) translate(-6%,10%) scale(.9);opacity:.7;}
+    100% {transform:rotate(3deg) translateZ(0) scale(1);opacity:1;}
+}
+.flip-forward-out{animation:flip-forward-out .55s ease-in forwards;}
+.flip-back-in   {animation:flip-back-in   .55s ease-out forwards;}
 </style>
 </head>
 <body>
 <div id="stage">
 
-    <!-- LETTER（帶上一頁 / 下一頁按鈕） -->
+    <!-- ===== 信紙層（前 + 後）===== -->
     <div id="letterWrapper">
+        <!-- front & back 疊在一起 -->
+        <img id="letterFront" class="letterImg" src="letter1.png" alt="letter front">
+        <img id="letterBack"  class="letterImg" style="visibility:hidden;" alt="letter back">
+        <!-- 導覽按鈕 -->
         <button id="prevBtn" class="navBtn">
             <img src="arrow-left.png" alt="Prev">
         </button>
-
-        <img id="letterImg" src="letter1.png" alt="letter">
-
         <button id="nextBtn" class="navBtn">
             <img src="arrow-right.png" alt="Next">
         </button>
     </div>
 
-    <!-- PHOTO（隨頁面改變） -->
+    <!-- ===== 照片 ===== -->
     <div id="photo">
-        <img id="photoImg" src="photo1.png" alt="photo">
+        <img id="photoImg" src="photo1.JPG" alt="photo">
     </div>
 
 </div>
 
 <script>
-/* ----------- 簡易換頁邏輯 ----------- */
+/* ===== 變數設定 ===== */
 const TOTAL = 4;
 let page = 1;
 
-const letter = document.getElementById("letterImg");
-const photo  = document.getElementById("photoImg");
-const prev   = document.getElementById("prevBtn");
-const next   = document.getElementById("nextBtn");
+/* DOM */
+let frontEl = document.getElementById("letterFront");  // 目前可見
+let backEl  = document.getElementById("letterBack");   // 備用（隱藏）
+const photo = document.getElementById("photoImg");
+const prev  = document.getElementById("prevBtn");
+const next  = document.getElementById("nextBtn");
 
-function update(){
-    letter.src = `letter${page}.png`;
-    photo.src  = `photo${page}.JPG`;
+/* ===== 工具 ===== */
+function swapFrontBack(){
+    [frontEl, backEl] = [backEl, frontEl];  // ES6 解構交換
+}
+
+function fadePhoto(newSrc){
+    photo.style.opacity = 0;
+    setTimeout(()=>{ photo.src = newSrc; photo.style.opacity = 1; }, 200);
+}
+
+function refreshButtons(){
     prev.classList.toggle("hidden", page === 1);
     next.classList.toggle("hidden", page === TOTAL);
 }
 
-prev.addEventListener("click", () => { if(page > 1){ page--; update(); } });
-next.addEventListener("click", () => { if(page < TOTAL){ page++; update(); } });
+/* ===== 下一頁 ===== */
+next.addEventListener("click", () =>{
+    if(page >= TOTAL) return;
+    const newPage = page + 1;
 
-update();   /* 初始化 */
+    /* 1. 將新頁面放在 back 層、顯示 */
+    backEl.src = `letter${newPage}.png`;
+    backEl.style.visibility = "visible";
+    backEl.style.zIndex = 0;
+    frontEl.style.zIndex = 1;      // front 在上
+
+    /* 2. front 往後丟動畫 */
+    frontEl.classList.add("flip-forward-out");
+
+    frontEl.addEventListener("animationend", function handler(){
+        frontEl.classList.remove("flip-forward-out");
+        frontEl.style.visibility = "hidden";   // 3. 隱藏舊頁
+        frontEl.removeEventListener("animationend", handler);
+
+        swapFrontBack();      // 4. 交換 front/back 角色
+    });
+
+    /* 照片淡換 */
+    fadePhoto(`photo${newPage}.JPG`);
+
+    page = newPage;
+    refreshButtons();
+});
+
+/* ===== 上一頁 ===== */
+prev.addEventListener("click", () =>{
+    if(page <= 1) return;
+    const newPage = page - 1;
+
+    /* 1. 將舊頁面放在 back 層（在 front 下方）*/
+    backEl.src = `letter${newPage}.png`;
+    backEl.style.visibility = "visible";
+    backEl.style.zIndex = 0;
+    frontEl.style.zIndex = 1;
+
+    /* 2. back 從後抽出到前面 */
+    backEl.classList.add("flip-back-in");
+    backEl.style.zIndex = 2;   // 動畫過程中確保在最前
+
+    backEl.addEventListener("animationend", function handler(){
+        backEl.classList.remove("flip-back-in");
+        frontEl.style.visibility = "hidden";   // 3. 隱藏原 front
+        backEl.removeEventListener("animationend", handler);
+
+        swapFrontBack();      // 4. 交換 front/back
+    });
+
+    /* 照片淡換 */
+    fadePhoto(`photo${newPage}.JPG`);
+
+    page = newPage;
+    refreshButtons();
+});
+
+/* ===== 初始按鈕狀態 ===== */
+refreshButtons();
 </script>
 </body>
 </html>
