@@ -2,86 +2,247 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8" />
-<title>Vertical Letter & Photo Viewer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />   <!-- 必備 -->
+<title>Letter & Photo – RWD</title>
 <style>
-/* ===== 基本 ===== */
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-    background:url("background.png") center/cover no-repeat fixed;
-    height:100vh;font-family:system-ui,"Helvetica Neue",sans-serif;
+/* === 共用基底 === */
+*
+{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
-#stage{position:relative;width:100%;height:100%;}
 
-/* ===== LETTER 疊圖容器 ===== */
-#letterWrapper{
-    position:absolute;top:4vh;left:55%;
-    transform:translateX(-50%) rotate(3deg);
-    width:clamp(260px,80vw,680px);aspect-ratio:3/2;
-    perspective:1200px;           /* 立體視差 */
+body
+{
+  background:url("background.png") center/cover no-repeat fixed;
+  height:100vh;
+  font-family:system-ui,"Helvetica Neue",sans-serif;
 }
-.letterImg{     /* 前後兩張共用 */
-    position:absolute;top:0;left:0;
-    width:100%;height:100%;object-fit:cover;
+
+#stage
+{
+    position:relative;
+    width:100%;
+    height:100%;
+}
+.hidden
+{
+    visibility:hidden;
+}
+/* === Letter 容器 === */
+#letterWrapper{
+  position:
+  absolute;
+  top:4vh;
+  left:55%;
+  transform:translateX(-50%) rotate(3deg);
+  width:clamp(260px,80vw,680px);
+  aspect-ratio:3/2;
+  perspective:1200px;
+  transition:transform .8s ease,opacity .8s ease;
+}
+.offscreen-left
+{
+    transform:translateX(-150%) rotate(3deg)!important;
+    opacity:0;
+}
+.letterImg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
     box-shadow:0 0 0 1px #0003;
     pointer-events:none;
 }
 
-/* ===== PHOTO ===== */
-#photo{
-    position:absolute;top:45vh;left:45%;
+/* === Photo === */
+#photo
+{
+    position:absolute;
+    top:45vh;
+    left:45%;
     transform:translateX(-50%) rotate(-6deg);
     width:clamp(220px,70vw,540px);aspect-ratio:4/3;
     box-shadow:0 0 0 1px #0003;
+    transition:transform .8s ease,opacity .8s ease;
 }
-#photoImg{width:100%;height:100%;object-fit:cover;transition:opacity .4s;}
+.offscreen-right
+{
+    transform:translateX(150%) rotate(-6deg)!important;
+    opacity:0;
+}
+#photoImg
+{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:opacity .4s;
+}
 
-/* ===== 導覽按鈕 ===== */
-.navBtn{
-    position:absolute;top:50%;translate:0 -50%;
-    width:clamp(30px,7vw,64px);height:clamp(45px,10vh,90px);
-    border:none;background:transparent;cursor:pointer;padding:0;
+/* === 導覽按鈕 === */
+.navBtn
+{
+  position:absolute;
+  top:50%;
+  translate:0 -50%;
+  width:clamp(30px,7vw,64px);
+  height:clamp(45px,10vh,90px);
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  padding:0;
 }
-#prevBtn{left:-3vw;z-index:9999;}   /* ← 永遠最上層 */
-#nextBtn{right:-3vw;z-index:9999;}
-.navBtn img{width:100%;height:100%;object-fit:contain;}
-.hidden{visibility:hidden;}
+#prevBtn
+{
+    left:-3vw;
+    z-index:9999;
+}
+#nextBtn
+{
+    right:-3vw;
+    z-index:9999;
+}
+.navBtn img
+{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
 
-/* ===== 翻頁動畫 ===== */
-@keyframes flip-forward-out{
-    0%   {transform:rotate(3deg) translateZ(0) scale(1);opacity:1;}
-    60%  {transform:rotate(8deg) translate(-6%,10%) scale(.9);opacity:.7;}
-    100% {transform:rotate(8deg) translate(-6%,60%) scale(.9);opacity:0;}
+/* === 翻頁動畫 (保留) === */
+@keyframes flip-forward-out
+{
+    0%
+    {
+        transform:rotate(0deg) translateZ(0) scale(1);
+        opacity:1;
+    }
+    60%
+    {
+        transform:rotate(5deg) translate(-6%,10%) scale(.9);
+        opacity:.7;
+    }
+    100%
+    {
+        transform:rotate(5deg) translate(-6%,60%) scale(.9);
+        opacity:0;
+    }
 }
-@keyframes flip-back-in{
-    0%   {transform:rotate(8deg) translate(-6%,60%) scale(.9);opacity:0;}
-    40%  {transform:rotate(8deg) translate(-6%,10%) scale(.9);opacity:.7;}
-    100% {transform:rotate(3deg) translateZ(0) scale(1);opacity:1;}
+@keyframes flip-back-in  
+{
+    0%
+    {
+        transform:rotate(5deg) translate(-6%,60%) scale(.9);
+        opacity:0;
+    }
+    40%
+    {
+        transform:rotate(5deg) translate(-6%,10%) scale(.9);
+        opacity:.7;
+    }
+    100%
+    {
+        transform:rotate(0deg) translateZ(0) scale(1);
+        opacity:1;
+    }
 }
-.flip-forward-out{animation:flip-forward-out .55s ease-in forwards;}
-.flip-back-in   {animation:flip-back-in   .55s ease-out forwards;}
+.flip-forward-out
+{
+    animation:flip-forward-out .55s ease-in forwards;
+}
+.flip-back-in   
+{
+    animation:flip-back-in   .55s ease-out forwards;
+}
+
+/* ---------------------------------------------------------------- */
+/* --------------------------  ★  RWD ★  -------------------------- */
+/* ---------------------------------------------------------------- */
+
+/* ① 手機直向 (≤600px) ------------------------------------------ */
+@media (max-width:600px){
+    #letterWrapper
+    {
+        position:static;
+        margin:6vh auto 0;
+        transform:rotate(2deg) translateX(0)!important;   /* 取消旋轉 */
+        width:90vw;
+    }
+    .offscreen-left
+    {
+        transform:translateY(-120%)!important;
+    } /* 從上方滑入 */
+    #photo
+    {
+        position:static;
+        margin:4vh auto 0;
+        transform:rotate(-4deg) translateX(0)!important;
+        width:90vw;
+    }
+    .offscreen-right
+    {
+        transform:translateY(120%)!important;
+    } /* 從下方滑入 */
+    .navBtn{
+        width:40px;
+        height:60px;      /* 再小一些 */
+    }
+    #prevBtn
+    {
+        left:4vw;
+    }           /* 不要負值，避免跑出螢幕 */
+    #nextBtn
+    {
+        right:4vw;
+    }
+}
+
+/* ② 601–1024px (橫向手機 / 平板) ------------------------------ */
+@media (min-width:601px) and (max-width:1024px)
+{
+    #letterWrapper
+    {
+        left:50%;
+        transform:translateX(-50%) rotate(2deg);
+        width:clamp(260px,85vw,720px);
+    }
+    #photo
+    {
+        left:50%;
+        transform:translateX(-50%) rotate(-4deg);
+        width:clamp(220px,80vw,600px);
+    }
+    #prevBtn
+    {
+        left:-5vw;
+    }
+    #nextBtn
+    {
+        right:-5vw;
+    }
+}
+
+/* ③ ≥1025px (桌機) --------------保持原設定即可 -------------- */
 </style>
 </head>
 <body>
 <div id="stage">
 
-    <!-- ===== 信紙層（前 + 後）===== -->
-    <div id="letterWrapper">
-        <!-- front & back 疊在一起 -->
-        <img id="letterFront" class="letterImg" src="letter1.png" alt="letter front">
-        <img id="letterBack"  class="letterImg" style="visibility:hidden;" alt="letter back">
-        <!-- 導覽按鈕 -->
-        <button id="prevBtn" class="navBtn">
-            <img src="arrow-left.png" alt="Prev">
-        </button>
-        <button id="nextBtn" class="navBtn">
-            <img src="arrow-right.png" alt="Next">
-        </button>
-    </div>
+  <!-- 信紙層 -->
+  <div id="letterWrapper" class="offscreen-left">
+    <img id="letterFront" class="letterImg" src="letter1.png" alt="letter front">
+    <img id="letterBack"  class="letterImg" style="visibility:hidden;" alt="letter back">
 
-    <!-- ===== 照片 ===== -->
-    <div id="photo">
-        <img id="photoImg" src="photo1.JPG" alt="photo">
-    </div>
+    <button id="prevBtn" class="navBtn"><img src="arrow-left.png" alt="Prev"></button>
+    <button id="nextBtn" class="navBtn"><img src="arrow-right.png" alt="Next"></button>
+  </div>
+
+  <!-- Photo -->
+  <div id="photo" class="offscreen-right">
+    <img id="photoImg" src="photo1.JPG" alt="photo">
+  </div>
 
 </div>
 
@@ -93,86 +254,98 @@ let page = 1;
 /* DOM */
 let frontEl = document.getElementById("letterFront");  // 目前可見
 let backEl  = document.getElementById("letterBack");   // 備用（隱藏）
+const letterWrapper = document.getElementById("letterWrapper");
+const photoWrap = document.getElementById("photo");
 const photo = document.getElementById("photoImg");
 const prev  = document.getElementById("prevBtn");
 const next  = document.getElementById("nextBtn");
 
 /* ===== 工具 ===== */
-function swapFrontBack(){
-    [frontEl, backEl] = [backEl, frontEl];  // ES6 解構交換
+function swapFrontBack()
+{ 
+    [frontEl, backEl] = [backEl, frontEl]; 
 }
 
-function fadePhoto(newSrc){
+function fadePhoto(newSrc)
+{
     photo.style.opacity = 0;
     setTimeout(()=>{ photo.src = newSrc; photo.style.opacity = 1; }, 200);
 }
 
-function refreshButtons(){
+function hideButtons()
+{ 
+    prev.style.visibility = next.style.visibility = 'hidden'; 
+}
+function showButtons()
+{ 
+    refreshButtons(); 
+}
+
+function refreshButtons()
+{
+    prev.style.visibility = next.style.visibility = 'visible';
     prev.classList.toggle("hidden", page === 1);
-    next.classList.toggle("hidden", page === TOTAL);
+    next.classList.toggle("hidden", page === TOTAL);   
 }
 
 /* ===== 下一頁 ===== */
 next.addEventListener("click", () =>{
     if(page >= TOTAL) return;
-    const newPage = page + 1;
+    hideButtons();
 
-    /* 1. 將新頁面放在 back 層、顯示 */
+    const newPage = page + 1;
     backEl.src = `letter${newPage}.png`;
     backEl.style.visibility = "visible";
-    backEl.style.zIndex = 0;
-    frontEl.style.zIndex = 1;      // front 在上
+    backEl.style.zIndex = 0; frontEl.style.zIndex = 1;
 
-    /* 2. front 往後丟動畫 */
     frontEl.classList.add("flip-forward-out");
-
     frontEl.addEventListener("animationend", function handler(){
         frontEl.classList.remove("flip-forward-out");
-        frontEl.style.visibility = "hidden";   // 3. 隱藏舊頁
+        frontEl.style.visibility = "hidden";
         frontEl.removeEventListener("animationend", handler);
 
-        swapFrontBack();      // 4. 交換 front/back 角色
-    });
+        swapFrontBack();
+        page = newPage;
+        showButtons();
+    }, {once:true});
 
-    /* 照片淡換 */
     fadePhoto(`photo${newPage}.JPG`);
-
-    page = newPage;
-    refreshButtons();
 });
 
 /* ===== 上一頁 ===== */
 prev.addEventListener("click", () =>{
     if(page <= 1) return;
-    const newPage = page - 1;
+    hideButtons();
 
-    /* 1. 將舊頁面放在 back 層（在 front 下方）*/
+    const newPage = page - 1;
     backEl.src = `letter${newPage}.png`;
     backEl.style.visibility = "visible";
-    backEl.style.zIndex = 0;
-    frontEl.style.zIndex = 1;
+    backEl.style.zIndex = 0; frontEl.style.zIndex = 1;
 
-    /* 2. back 從後抽出到前面 */
     backEl.classList.add("flip-back-in");
-    backEl.style.zIndex = 2;   // 動畫過程中確保在最前
+    backEl.style.zIndex = 2;
 
     backEl.addEventListener("animationend", function handler(){
         backEl.classList.remove("flip-back-in");
-        frontEl.style.visibility = "hidden";   // 3. 隱藏原 front
+        frontEl.style.visibility = "hidden";
         backEl.removeEventListener("animationend", handler);
 
-        swapFrontBack();      // 4. 交換 front/back
-    });
+        swapFrontBack();
+        page = newPage;
+        showButtons();
+    }, {once:true});
 
-    /* 照片淡換 */
     fadePhoto(`photo${newPage}.JPG`);
-
-    page = newPage;
-    refreshButtons();
 });
 
-/* ===== 初始按鈕狀態 ===== */
-refreshButtons();
+/* ===== 首次滑入動畫 ===== */
+window.addEventListener("load", () =>{
+    /* 延遲少許觸發，避免與瀏覽器繪製競爭 */
+    setTimeout(()=>{
+        letterWrapper.classList.remove("offscreen-left");
+        photoWrap.classList.remove("offscreen-right");
+    }, 50);
+});
 </script>
 </body>
 </html>
