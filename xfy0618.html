@@ -2,350 +2,153 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />   <!-- 必備 -->
-<title>Letter & Photo – RWD</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Letter &amp; Photo – Paint at Right</title>
+
 <style>
-/* === 共用基底 === */
-*
-{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:url("background.png") center/cover no-repeat fixed;height:100vh;font-family:system-ui,"Helvetica Neue",sans-serif;overflow:hidden;}
+#stage{position:relative;width:100%;height:100%;}
+.hidden{display:none;}
 
-body
-{
-  background:url("background.png") center/cover no-repeat fixed;
-  height:100vh;
-  font-family:system-ui,"Helvetica Neue",sans-serif;
-}
+/* 泡泡 (省略與前相同) */
+#bubbleContainer{position:absolute;inset:0;pointer-events:none;z-index:10001;}
+.bubble{position:absolute;bottom:-120px;border-radius:50%;animation:bubbleRise var(--rise) linear forwards;}
+@keyframes bubbleRise{0%{transform:translate(0,0) scale(var(--scaleS));opacity:.9;}100%{transform:translate(var(--moveX),-120vh) scale(var(--scaleE));opacity:0;}}
 
-#stage
-{
-    position:relative;
-    width:100%;
-    height:100%;
-}
-.hidden
-{
-    visibility:hidden;
-}
-/* === Letter 容器 === */
-#letterWrapper{
-  position:
-  absolute;
-  top:4vh;
-  left:55%;
-  transform:translateX(-50%) rotate(3deg);
-  width:clamp(260px,80vw,680px);
-  aspect-ratio:3/2;
-  perspective:1200px;
-  transition:transform .8s ease,opacity .8s ease;
-}
-.offscreen-left
-{
-    transform:translateX(-150%) rotate(3deg)!important;
-    opacity:0;
-}
-.letterImg{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    box-shadow:0 0 0 1px #0003;
-    pointer-events:none;
-}
+/* Letter */
+#letterWrapper{position:absolute;top:4vh;left:65%;transform:translateX(-50%) rotate(3deg);width:clamp(260px,80vw,680px);aspect-ratio:3/2;perspective:1200px;transition:.8s ease;z-index:2;}
+.offscreen-left{transform:translateX(-150%) rotate(3deg)!important;opacity:0;}
+.letterImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.25);pointer-events:none;}
 
-/* === Photo === */
-#photo
-{
+/* Photo 容器 */
+#photo{
     position:absolute;
     top:45vh;
-    left:45%;
-    transform:translateX(-50%) rotate(-6deg);
-    width:clamp(220px,70vw,540px);aspect-ratio:4/3;
-    box-shadow:0 0 0 1px #0003;
-    transition:transform .8s ease,opacity .8s ease;
+    left:35%;
+    transform:translateX(-50%);
+    width:clamp(220px,70vw,540px);
+    aspect-ratio:4/3;
+    z-index:2;
+    transition:.8s ease;
 }
-.offscreen-right
-{
-    transform:translateX(150%) rotate(-6deg)!important;
-    opacity:0;
-}
-#photoImg
-{
-    width:100%;
-    height:100%;
+.offscreen-right{transform:translateX(150%)!important;opacity:0;}
+#photoImg{
+    width:80%;
+    height:80%;
     object-fit:cover;
+    transform:rotate(-6deg);
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
     transition:opacity .4s;
 }
 
-/* === 導覽按鈕 === */
-.navBtn
-{
+/* ★ Paint：photo 右側 (不旋轉) */
+#paint{
   position:absolute;
-  top:50%;
-  translate:0 -50%;
-  width:clamp(30px,7vw,64px);
-  height:clamp(45px,10vh,90px);
-  border:none;
-  background:transparent;
-  cursor:pointer;
-  padding:0;
+  top:65%;
+  left:110%;
+  transform:translateY(-50%);
+  width:48%;
+  height:auto;
+  cursor:pointer;user-select:none;
+  object-fit:contain;
+  z-index:3;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
 }
-#prevBtn
-{
-    left:-3vw;
-    z-index:9999;
+@keyframes paintPop{
+  0%{transform:translateY(-50%) scale(1);}
+  50%{transform:translateY(-50%) scale(1.25);}
+  100%{transform:translateY(-50%) scale(1);}
 }
-#nextBtn
-{
-    right:-3vw;
-    z-index:9999;
-}
-.navBtn img
-{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-}
+.paint-pop{animation:paintPop .25s ease;}
 
-/* === 翻頁動畫 (保留) === */
-@keyframes flip-forward-out
-{
-    0%
-    {
-        transform:rotate(0deg) translateZ(0) scale(1);
-        opacity:1;
-    }
-    60%
-    {
-        transform:rotate(5deg) translate(-6%,10%) scale(.9);
-        opacity:.7;
-    }
-    100%
-    {
-        transform:rotate(5deg) translate(-6%,60%) scale(.9);
-        opacity:0;
-    }
-}
-@keyframes flip-back-in  
-{
-    0%
-    {
-        transform:rotate(5deg) translate(-6%,60%) scale(.9);
-        opacity:0;
-    }
-    40%
-    {
-        transform:rotate(5deg) translate(-6%,10%) scale(.9);
-        opacity:.7;
-    }
-    100%
-    {
-        transform:rotate(0deg) translateZ(0) scale(1);
-        opacity:1;
-    }
-}
-.flip-forward-out
-{
-    animation:flip-forward-out .55s ease-in forwards;
-}
-.flip-back-in   
-{
-    animation:flip-back-in   .55s ease-out forwards;
-}
+.navBtn{position:absolute;top:50%;translate:0 -50%;width:clamp(30px,7vw,64px);height:clamp(45px,10vh,90px);border:none;background:transparent;cursor:pointer;padding:0;}
+#prevBtn{left:-3vw;z-index:9999;}#nextBtn{right:-3vw;z-index:9999;}
+.navBtn img{width:100%;height:100%;object-fit:contain;}
 
-/* ---------------------------------------------------------------- */
-/* --------------------------  ★  RWD ★  -------------------------- */
-/* ---------------------------------------------------------------- */
+@keyframes flip-forward-out{0%{transform:rotate(0) scale(1);opacity:1;}60%{transform:rotate(5deg) translate(-6%,10%) scale(.9);opacity:.7;}100%{transform:rotate(5deg) translate(-6%,60%) scale(.9);opacity:0;}}
+@keyframes flip-back-in{0%{transform:rotate(5deg) translate(-6%,60%) scale(.9);opacity:0;}40%{transform:rotate(5deg) translate(-6%,10%) scale(.9);opacity:.7;}100%{transform:rotate(0) scale(1);opacity:1;}}
+.flip-forward-out{animation:flip-forward-out .55s ease-in forwards;}
+.flip-back-in   {animation:flip-back-in   .55s ease-out forwards;}
 
-/* ① 手機直向 (≤600px) ------------------------------------------ */
+/* RWD 斷點 (與前相同) */
 @media (max-width:600px){
-    #letterWrapper
-    {
-        position:static;
-        margin:6vh auto 0;
-        transform:rotate(2deg) translateX(0)!important;   /* 取消旋轉 */
-        width:90vw;
-    }
-    .offscreen-left
-    {
-        transform:translateY(-120%)!important;
-    } /* 從上方滑入 */
-    #photo
-    {
-        position:static;
-        margin:4vh auto 0;
-        transform:rotate(-4deg) translateX(0)!important;
-        width:90vw;
-    }
-    .offscreen-right
-    {
-        transform:translateY(120%)!important;
-    } /* 從下方滑入 */
-    .navBtn{
-        width:40px;
-        height:60px;      /* 再小一些 */
-    }
-    #prevBtn
-    {
-        left:4vw;
-    }           /* 不要負值，避免跑出螢幕 */
-    #nextBtn
-    {
-        right:4vw;
-    }
+  #letterWrapper{position:static;margin:6vh auto 0;transform:rotate(3deg)!important;width:90vw;}
+  #photo{position:static;margin:4vh auto 0;width:90vw;}
+  #paint{width:45%;left:105%;top:60%;}
+  .navBtn{width:40px;height:60px;}#prevBtn{left:4vw;}#nextBtn{right:4vw;}
 }
-
-/* ② 601–1024px (橫向手機 / 平板) ------------------------------ */
-@media (min-width:601px) and (max-width:1024px)
-{
-    #letterWrapper
-    {
-        left:50%;
-        transform:translateX(-50%) rotate(2deg);
-        width:clamp(260px,85vw,720px);
-    }
-    #photo
-    {
-        left:50%;
-        transform:translateX(-50%) rotate(-4deg);
-        width:clamp(220px,80vw,600px);
-    }
-    #prevBtn
-    {
-        left:-5vw;
-    }
-    #nextBtn
-    {
-        right:-5vw;
-    }
+@media (min-width:601px) and (max-width:1024px){
+  #letterWrapper{left:50%;transform:translateX(-50%) rotate(3deg);width:clamp(260px,85vw,720px);}
+  #photo{left:50%;transform:translateX(-50%);width:clamp(220px,80vw,600px);}
+  #prevBtn{left:-5vw;}#nextBtn{right:-5vw;}
 }
-
-/* ③ ≥1025px (桌機) --------------保持原設定即可 -------------- */
 </style>
 </head>
+
 <body>
 <div id="stage">
+  <div id="bubbleContainer"></div>
 
-  <!-- 信紙層 -->
   <div id="letterWrapper" class="offscreen-left">
     <img id="letterFront" class="letterImg" src="letter1.png" alt="letter front">
     <img id="letterBack"  class="letterImg" style="visibility:hidden;" alt="letter back">
-
-    <button id="prevBtn" class="navBtn"><img src="arrow-left.png" alt="Prev"></button>
-    <button id="nextBtn" class="navBtn"><img src="arrow-right.png" alt="Next"></button>
+    <button id="prevBtn" class="navBtn"><img src="arrow-left.png" alt="上一頁"></button>
+    <button id="nextBtn" class="navBtn"><img src="arrow-right.png" alt="下一頁"></button>
   </div>
 
-  <!-- Photo -->
   <div id="photo" class="offscreen-right">
     <img id="photoImg" src="photo1.JPG" alt="photo">
+    <img id="paint"    src="paint1.png" alt="paint">
   </div>
-
 </div>
 
 <script>
-/* ===== 變數設定 ===== */
-const TOTAL = 4;
-let page = 1;
+/* ===== Letter / Photo ===== */
+const TOTAL=4;let page=1;
+let front=document.getElementById("letterFront"),back=document.getElementById("letterBack");
+const letterWrap=document.getElementById("letterWrapper"),photoWrap=document.getElementById("photo"),
+      photo=document.getElementById("photoImg"),prev=document.getElementById("prevBtn"),next=document.getElementById("nextBtn"),
+      bubbleBox=document.getElementById("bubbleContainer"),paint=document.getElementById("paint");
+const swap=()=>[front,back]=[back,front];
+const fade=src=>{photo.style.opacity=0;setTimeout(()=>{photo.src=src;photo.style.opacity=1;},200);}
+const hideBtns=()=>{prev.classList.add('hidden');next.classList.add('hidden');};
+const updateBtns=()=>{prev.classList.toggle('hidden',page===1);next.classList.toggle('hidden',page===TOTAL);};
 
-/* DOM */
-let frontEl = document.getElementById("letterFront");  // 目前可見
-let backEl  = document.getElementById("letterBack");   // 備用（隱藏）
-const letterWrapper = document.getElementById("letterWrapper");
-const photoWrap = document.getElementById("photo");
-const photo = document.getElementById("photoImg");
-const prev  = document.getElementById("prevBtn");
-const next  = document.getElementById("nextBtn");
+next.onclick=()=>{if(page>=TOTAL)return;hideBtns();const n=page+1;
+  back.src=`letter${n}.png`;back.style.visibility="visible";back.style.zIndex=0;front.style.zIndex=1;
+  front.classList.add("flip-forward-out");
+  front.addEventListener("animationend",function h(){front.classList.remove("flip-forward-out");front.style.visibility="hidden";front.removeEventListener("animationend",h);swap();page=n;updateBtns();},{once:true});
+  fade(`photo${n}.JPG`);
+};
+prev.onclick=()=>{if(page<=1)return;hideBtns();const n=page-1;
+  back.src=`letter${n}.png`;back.style.visibility="visible";back.style.zIndex=0;front.style.zIndex=1;
+  back.classList.add("flip-back-in");back.style.zIndex=2;
+  back.addEventListener("animationend",function h(){back.classList.remove("flip-back-in");front.style.visibility="hidden";back.removeEventListener("animationend",h);swap();page=n;updateBtns();},{once:true});
+  fade(`photo${n}.JPG`);
+};
+window.addEventListener("load",()=>setTimeout(()=>{letterWrap.classList.remove("offscreen-left");photoWrap.classList.remove("offscreen-right");updateBtns();},50));
 
-/* ===== 工具 ===== */
-function swapFrontBack()
-{ 
-    [frontEl, backEl] = [backEl, frontEl]; 
+/* ===== 泡泡 ===== */
+function makeBubble(){
+  const b=document.createElement("span");b.className="bubble";
+  const size=30+Math.random()*70;b.style.width=b.style.height=size+"px";
+  const hue=Math.floor(Math.random()*360),sat=60+Math.random()*30,light=60+Math.random()*15,alpha=0.2+Math.random()*0.2;
+  b.style.background=`hsla(${hue},${sat}%,${light}%,${alpha})`;
+  b.style.left=Math.random()*100+"%";
+  const rise=5+Math.random()*8,scaleS=0.5+Math.random()*0.8,scaleE=scaleS+0.4,drift=(Math.random()*60-30)+"px";
+  b.style.setProperty("--rise",rise+"s");b.style.setProperty("--scaleS",scaleS);b.style.setProperty("--scaleE",scaleE);b.style.setProperty("--moveX",drift);
+  bubbleBox.appendChild(b);b.addEventListener("animationend",()=>b.remove());
 }
+setInterval(makeBubble,350);
 
-function fadePhoto(newSrc)
-{
-    photo.style.opacity = 0;
-    setTimeout(()=>{ photo.src = newSrc; photo.style.opacity = 1; }, 200);
-}
-
-function hideButtons()
-{ 
-    prev.style.visibility = next.style.visibility = 'hidden'; 
-}
-function showButtons()
-{ 
-    refreshButtons(); 
-}
-
-function refreshButtons()
-{
-    prev.style.visibility = next.style.visibility = 'visible';
-    prev.classList.toggle("hidden", page === 1);
-    next.classList.toggle("hidden", page === TOTAL);   
-}
-
-/* ===== 下一頁 ===== */
-next.addEventListener("click", () =>{
-    if(page >= TOTAL) return;
-    hideButtons();
-
-    const newPage = page + 1;
-    backEl.src = `letter${newPage}.png`;
-    backEl.style.visibility = "visible";
-    backEl.style.zIndex = 0; frontEl.style.zIndex = 1;
-
-    frontEl.classList.add("flip-forward-out");
-    frontEl.addEventListener("animationend", function handler(){
-        frontEl.classList.remove("flip-forward-out");
-        frontEl.style.visibility = "hidden";
-        frontEl.removeEventListener("animationend", handler);
-
-        swapFrontBack();
-        page = newPage;
-        showButtons();
-    }, {once:true});
-
-    fadePhoto(`photo${newPage}.JPG`);
-});
-
-/* ===== 上一頁 ===== */
-prev.addEventListener("click", () =>{
-    if(page <= 1) return;
-    hideButtons();
-
-    const newPage = page - 1;
-    backEl.src = `letter${newPage}.png`;
-    backEl.style.visibility = "visible";
-    backEl.style.zIndex = 0; frontEl.style.zIndex = 1;
-
-    backEl.classList.add("flip-back-in");
-    backEl.style.zIndex = 2;
-
-    backEl.addEventListener("animationend", function handler(){
-        backEl.classList.remove("flip-back-in");
-        frontEl.style.visibility = "hidden";
-        backEl.removeEventListener("animationend", handler);
-
-        swapFrontBack();
-        page = newPage;
-        showButtons();
-    }, {once:true});
-
-    fadePhoto(`photo${newPage}.JPG`);
-});
-
-/* ===== 首次滑入動畫 ===== */
-window.addEventListener("load", () =>{
-    /* 延遲少許觸發，避免與瀏覽器繪製競爭 */
-    setTimeout(()=>{
-        letterWrapper.classList.remove("offscreen-left");
-        photoWrap.classList.remove("offscreen-right");
-    }, 50);
-});
+/* ===== Paint 隨機換圖 ===== */
+let paintIdx=1;
+paint.onclick=()=>{
+  let n;do{n=Math.floor(Math.random()*9)+1;}while(n===paintIdx);
+  paintIdx=n;paint.src=`paint${paintIdx}.png`;
+  paint.classList.remove("paint-pop");void paint.offsetWidth;paint.classList.add("paint-pop");
+};
 </script>
 </body>
 </html>
