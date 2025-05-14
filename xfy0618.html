@@ -6,20 +6,86 @@
 <title>Letter &amp; Photo – Paint at Right</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:url("background.png") center/cover no-repeat fixed;height:100vh;font-family:system-ui,"Helvetica Neue",sans-serif;overflow:hidden;}
-#stage{position:relative;width:100%;height:100%;}
-.hidden{display:none;}
+*
+{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+body
+{
+    background:url("background.png") center/cover no-repeat fixed;
+    height:100vh;
+    font-family:system-ui,"Helvetica Neue",sans-serif;
+    overflow:hidden;
+}
+#stage
+{
+    position:relative;
+    width:100%;
+    height:100%;
+}
+.hidden
+{
+    display:none;
+}
 
 /* 泡泡 (省略與前相同) */
-#bubbleContainer{position:absolute;inset:0;pointer-events:none;z-index:10001;}
-.bubble{position:absolute;bottom:-120px;border-radius:50%;animation:bubbleRise var(--rise) linear forwards;}
-@keyframes bubbleRise{0%{transform:translate(0,0) scale(var(--scaleS));opacity:.9;}100%{transform:translate(var(--moveX),-120vh) scale(var(--scaleE));opacity:0;}}
+#bubbleContainer
+{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:10001;
+}
+.bubble
+{
+    position:absolute;
+    bottom:-120px;
+    border-radius:50%;
+    animation:bubbleRise var(--rise) linear forwards;
+}
+@keyframes bubbleRise
+{
+    0%
+    {
+        transform:translate(0,0) scale(var(--scaleS));
+        opacity:.9;
+    }
+    100%
+    {
+        transform:translate(var(--moveX),-120vh) scale(var(--scaleE));
+        opacity:0;
+    }
+}
 
 /* Letter */
-#letterWrapper{position:absolute;top:4vh;left:65%;transform:translateX(-50%) rotate(3deg);width:clamp(260px,80vw,680px);aspect-ratio:3/2;perspective:1200px;transition:.8s ease;z-index:2;}
-.offscreen-left{transform:translateX(-150%) rotate(3deg)!important;opacity:0;}
-.letterImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.25);pointer-events:none;}
+#letterWrapper
+{
+    position:absolute;
+    top:4vh;
+    left:65%;
+    transform:translateX(-50%) rotate(3deg);
+    width:clamp(260px,80vw,680px);
+    aspect-ratio:3/2;
+    perspective:1200px;
+    transition:.8s ease;
+    z-index:2;
+}
+.offscreen-left
+{
+    transform:translateX(-150%) rotate(3deg)!important;
+    opacity:0;
+}
+.letterImg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+    pointer-events:none;
+}
 
 /* Photo 容器 */
 #photo{
@@ -32,7 +98,11 @@ body{background:url("background.png") center/cover no-repeat fixed;height:100vh;
     z-index:2;
     transition:.8s ease;
 }
-.offscreen-right{transform:translateX(150%)!important;opacity:0;}
+.offscreen-right
+{
+    transform:translateX(150%)!important;
+    opacity:0;
+}
 #photoImg{
     width:80%;
     height:80%;
@@ -44,16 +114,16 @@ body{background:url("background.png") center/cover no-repeat fixed;height:100vh;
 
 /* ★ Paint：photo 右側 (不旋轉) */
 #paint{
-  position:absolute;
-  top:65%;
-  left:110%;
-  transform:translateY(-50%);
-  width:48%;
-  height:auto;
-  cursor:pointer;user-select:none;
-  object-fit:contain;
-  z-index:3;
-  box-shadow:0 8px 20px rgba(0,0,0,.25);
+    position:absolute;
+    top:65%;
+    left:110%;
+    transform:translateY(-50%);
+    width:48%;
+    height:auto;
+    cursor:pointer;user-select:none;
+    object-fit:contain;
+    z-index:3;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
 }
 @keyframes paintPop{
   0%{transform:translateY(-50%) scale(1);}
@@ -62,27 +132,148 @@ body{background:url("background.png") center/cover no-repeat fixed;height:100vh;
 }
 .paint-pop{animation:paintPop .25s ease;}
 
-.navBtn{position:absolute;top:50%;translate:0 -50%;width:clamp(30px,7vw,64px);height:clamp(45px,10vh,90px);border:none;background:transparent;cursor:pointer;padding:0;}
-#prevBtn{left:-3vw;z-index:9999;}#nextBtn{right:-3vw;z-index:9999;}
-.navBtn img{width:100%;height:100%;object-fit:contain;}
+.navBtn
+{
+    position:absolute;
+    top:50%;
+    translate:0 -50%;
+    width:clamp(30px,7vw,64px);
+    height:clamp(45px,10vh,90px);
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    padding:0;
+}
+#prevBtn
+{
+    left:-3vw;
+    z-index:9999;
+}
+#nextBtn
+{
+    right:-3vw;
+    z-index:9999;
+}
+.navBtn img
+{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
 
-@keyframes flip-forward-out{0%{transform:rotate(0) scale(1);opacity:1;}60%{transform:rotate(5deg) translate(-6%,10%) scale(.9);opacity:.7;}100%{transform:rotate(5deg) translate(-6%,60%) scale(.9);opacity:0;}}
-@keyframes flip-back-in{0%{transform:rotate(5deg) translate(-6%,60%) scale(.9);opacity:0;}40%{transform:rotate(5deg) translate(-6%,10%) scale(.9);opacity:.7;}100%{transform:rotate(0) scale(1);opacity:1;}}
-.flip-forward-out{animation:flip-forward-out .55s ease-in forwards;}
-.flip-back-in   {animation:flip-back-in   .55s ease-out forwards;}
+@keyframes flip-forward-out
+{
+    0%
+    {
+        transform:rotate(0) scale(1);
+        opacity:1;
+    }
+    60%
+    {
+        transform:rotate(5deg) translate(-6%,10%) scale(.9);
+        opacity:.7;
+    }
+    100%
+    {
+        transform:rotate(5deg) translate(-6%,60%) scale(.9);
+        opacity:0;
+    }
+}
+@keyframes flip-back-in
+{
+    0%
+    {
+        transform:rotate(5deg) translate(-6%,60%) scale(.9);
+        opacity:0;
+    }
+    40%
+    {
+        transform:rotate(5deg) translate(-6%,10%) scale(.9);
+        opacity:.7;
+    }
+    100%
+    {
+        transform:rotate(0) scale(1);
+        opacity:1;
+    }
+}
+.flip-forward-out
+{
+    animation:flip-forward-out .55s ease-in forwards;
+}
+.flip-back-in   
+{
+    animation:flip-back-in   .55s ease-out forwards;
+}
 
 /* RWD 斷點 (與前相同) */
-@media (max-width:600px){
-  #letterWrapper{position:static;margin:6vh auto 0;transform:rotate(3deg)!important;width:90vw;}
-  #photo{position:static;margin:4vh auto 0;width:90vw;}
-  #paint{width:45%;left:105%;top:60%;}
-  .navBtn{width:40px;height:60px;}#prevBtn{left:4vw;}#nextBtn{right:4vw;}
+@media (max-width:600px)
+{
+    #letterWrapper
+    {
+        left:15%;
+        margin:6vh auto 0;
+        transform:rotate(3deg)!important;
+        width:80vw;
+    }
+    #photo
+    {
+        top:30%;
+        left:35%;
+        margin:4vh auto 0;
+        width:60vw;
+    }
+    #paint
+    {
+        width:45%;
+        left:90%;
+        top:45%;
+    }
+    .navBtn
+    {
+        width:40px;
+        height:60px;
+    }
+    #prevBtn
+    {
+        left:-3vw;
+    }
+    #nextBtn
+    {
+        right:-3vw;
+    }
 }
-@media (min-width:601px) and (max-width:1024px){
-  #letterWrapper{left:50%;transform:translateX(-50%) rotate(3deg);width:clamp(260px,85vw,720px);}
-  #photo{left:50%;transform:translateX(-50%);width:clamp(220px,80vw,600px);}
-  #prevBtn{left:-5vw;}#nextBtn{right:-5vw;}
+@media (min-width:601px) and (max-width:1024px)
+{
+    #letterWrapper
+    {
+        left:55%;
+        transform:translateX(-50%) rotate(3deg);
+        width:clamp(260px,80vw,720px);
+    }
+    #photo
+    {
+        top:40%;
+        left:40%;
+        transform:translateX(-50%);
+        width:clamp(220px,70vw,600px);
+    }
+    #paint
+    {
+        width:40%;
+        left:90%;
+        top:60%;
+    }
+    #prevBtn
+    {
+        left:-5vw;
+    }
+    #nextBtn
+    {
+        right:-5vw;
+    }
 }
+
 </style>
 </head>
 
