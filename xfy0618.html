@@ -5,14 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Letter &amp; Photo – Paint at Right</title>
 
-<!-- 音樂播放器 -->
+<!-- ===== 音樂播放器 ===== -->
 <audio id="bgm" loop>
   <source src="bgm.mp3" type="audio/mpeg">
 </audio>
 <!-- 播放╱暫停按鈕 -->
 <img id="musicBtn" src="play.png" alt="播放/暫停">
 
+<!-- （建議）最高優先序先預載首頁圖片 -->
+<link rel="preload" href="letter1.png" as="image">
+<link rel="preload" href="photo1.JPG"  as="image">
+
 <style>
+/* ---------- reset ---------- */
 *
 {
   box-sizing:border-box;
@@ -36,10 +41,7 @@ body
   width:100%;
   height:100%;
 }
-.hidden
-{
-  display:none;
-}
+.hidden{display:none;}
 
 /* ===== 音樂按鈕 ===== */
 #musicBtn
@@ -140,7 +142,7 @@ body
   transition:opacity .4s;
 }
 
-/* ===== Paint：photo 右側 ===== */
+/* ===== Paint ===== */
 #paint
 {
   position:absolute;
@@ -157,15 +159,13 @@ body
 }
 @keyframes paintPop
 {
-  0%{transform:translateY(-50%) scale(1);}
-  50%{transform:translateY(-50%) scale(1.25);}
+  0%  {transform:translateY(-50%) scale(1);}
+  50% {transform:translateY(-50%) scale(1.25);}
   100%{transform:translateY(-50%) scale(1);}
 }
-.paint-pop
-{
-  animation:paintPop .25s ease;
-}
+.paint-pop{animation:paintPop .25s ease;}
 
+/* ===== 翻頁箭頭 ===== */
 .navBtn
 {
   position:absolute;
@@ -178,69 +178,30 @@ body
   cursor:pointer;
   padding:0;
 }
-#prevBtn
-{
-  left:-5vw;
-  z-index:9999;
-}
-#nextBtn
-{
-  right:-5vw;
-  z-index:9999;
-}
+#prevBtn{left:-5vw;  z-index:9999;}
+#nextBtn{right:-5vw; z-index:9999;}
 .navBtn img
 {
   width:100%;
   height:100%;
   object-fit:contain;
 }
-
 @keyframes flip-forward-out
 {
-  0%
-  {
-    transform:rotate(0) scale(1);
-    opacity:1;
-  }
-  60%
-  {
-    transform:rotate(5deg) translate(-6%,10%) scale(.9);
-    opacity:.7;
-  }
-  100%
-  {
-    transform:rotate(5deg) translate(-6%,60%) scale(.9);
-    opacity:0;
-  }
+  0%  {transform:rotate(0) scale(1);                opacity:1;}
+  60% {transform:rotate(5deg) translate(-6%,10%) scale(.9); opacity:.7;}
+  100%{transform:rotate(5deg) translate(-6%,60%) scale(.9); opacity:0;}
 }
 @keyframes flip-back-in
 {
-  0%
-  {
-    transform:rotate(5deg) translate(-6%,60%) scale(.9);
-    opacity:0;
-  }
-  40%
-  {
-    transform:rotate(5deg) translate(-6%,10%) scale(.9);
-    opacity:.7;
-  }
-  100%
-  {
-    transform:rotate(0) scale(1);
-    opacity:1;
-  }
+  0%  {transform:rotate(5deg) translate(-6%,60%) scale(.9); opacity:0;}
+  40% {transform:rotate(5deg) translate(-6%,10%) scale(.9); opacity:.7;}
+  100%{transform:rotate(0) scale(1);                          opacity:1;}
 }
-.flip-forward-out
-{
-  animation:flip-forward-out .55s ease-in forwards;
-}
-.flip-back-in
-{
-  animation:flip-back-in .55s ease-out forwards;
-}
+.flip-forward-out{animation:flip-forward-out .55s ease-in forwards;}
+.flip-back-in    {animation:flip-back-in   .55s ease-out forwards;}
 
-/* ===== RWD 斷點 ===== */
+/* ===== RWD ===== */
 @media (max-width:600px)
 {
   #letterWrapper
@@ -263,11 +224,7 @@ body
     left:90%;
     top:45%;
   }
-  .navBtn
-  {
-    width:40px;
-    height:60px;
-  }
+  .navBtn{width:40px;height:60px;}
   #prevBtn{left:-8vw;}
   #nextBtn{right:-8vw;}
 }
@@ -311,11 +268,30 @@ body
 
   <div id="photo" class="offscreen-right">
     <img id="photoImg" src="photo1.JPG" alt="photo">
-    <img id="paint"    src="paint1.png" alt="paint">
+    <img id="paint"    src="paint1.png"  alt="paint">
   </div>
 </div>
 
 <script>
+/* ===== 預載圖片（避免翻頁卡頓） ===== */
+const TOTAL = 5;
+const imgPool = [];
+
+const sources = [];
+for(let i = 1 ; i <= TOTAL ; i++)
+{
+  sources.push(`letter${i}.png`);
+  sources.push(`photo${i}.JPG`);
+}
+for(let i = 1 ; i <= 9 ; i++){sources.push(`paint${i}.png`);}
+
+sources.forEach(src =>
+{
+  const img = new Image();
+  img.src   = src;
+  imgPool.push(img);        /* 保持引用避免 GC */
+});
+
 /* ===== 音樂按鈕 ===== */
 const musicBtn = document.getElementById('musicBtn');
 const bgm      = document.getElementById('bgm');
@@ -338,7 +314,6 @@ musicBtn.onclick = () =>
 };
 
 /* ===== Letter / Photo ===== */
-const TOTAL = 5;
 let   page  = 1;
 
 let front = document.getElementById('letterFront');
@@ -369,7 +344,6 @@ const hideBtns = () =>
   prev.classList.add('hidden');
   next.classList.add('hidden');
 };
-
 const updateBtns = () =>
 {
   prev.classList.toggle('hidden', page === 1);
@@ -457,15 +431,15 @@ function makeBubble()
   const maxLeft = window.innerWidth - size;
   b.style.left  = (Math.random() * maxLeft) + 'px';
 
-  const rise    = 5 + Math.random() * 8;
-  const scaleS  = 0.5 + Math.random() * 0.8;
-  const scaleE  = scaleS + 0.4;
-  const drift   = (Math.random() * 60 - 30) + 'px';
+  const rise   = 5 + Math.random() * 8;
+  const scaleS = 0.5 + Math.random() * 0.8;
+  const scaleE = scaleS + 0.4;
+  const drift  = (Math.random() * 60 - 30) + 'px';
 
-  b.style.setProperty('--rise',    rise   + 's');
-  b.style.setProperty('--scaleS',  scaleS);
-  b.style.setProperty('--scaleE',  scaleE);
-  b.style.setProperty('--moveX',   drift);
+  b.style.setProperty('--rise',   rise  + 's');
+  b.style.setProperty('--scaleS', scaleS);
+  b.style.setProperty('--scaleE', scaleE);
+  b.style.setProperty('--moveX',  drift);
 
   bubbleBox.appendChild(b);
   b.addEventListener('animationend', () => b.remove());
@@ -478,14 +452,10 @@ let paintIdx = 1;
 paint.onclick = () =>
 {
   let n;
-  do
-  {
-    n = Math.floor(Math.random() * 9) + 1;
-  }
-  while(n === paintIdx);
+  do{n = Math.floor(Math.random() * 9) + 1;}while(n === paintIdx);
 
-  paintIdx      = n;
-  paint.src     = `paint${paintIdx}.png`;
+  paintIdx  = n;
+  paint.src = `paint${paintIdx}.png`;
   paint.classList.remove('paint-pop');
   void paint.offsetWidth;
   paint.classList.add('paint-pop');
